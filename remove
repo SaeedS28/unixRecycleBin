@@ -1,0 +1,6 @@
+#!/bin/bash
+
+if [ ! -d $HOME/deleted ] ; then
+	mkdir $HOME/deleted
+fi
+
