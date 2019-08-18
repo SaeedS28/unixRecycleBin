@@ -6,6 +6,8 @@ if [ ! -d $HOME/deleted ] ; then
 	mkdir $HOME/deleted
 fi
 
+# error checking
+
 if [ -z $1 ] ; then
 	echo "No file name provided."
 	exit 1
@@ -16,3 +18,8 @@ elif [ ! -e $1 ] ; then
 	echo "File does not exist"
 	exit 3
 fi
+
+filepath=$(readlink -f $1 | rev | cut -d'/' -f 2- | rev)
+filename=$(basename $1)
+
+
