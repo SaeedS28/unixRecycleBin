@@ -24,7 +24,17 @@ filename=$(basename $1)
 inodeIdentifier=$(stat -c%i $filepath/$filename)
 
 formattedFileName=$filename'_'$inodeIdentifier
+formattedFullPathName=$formattedFileName':'$filepath'/'$filename
 
-formattedPathName=$formattedFileName':'$filepath
-echo $formattedPathName
-echo $formattedFileName
+##   Change the file path before the actual submission   ##"
+if [ $HOME"/unixRecycleBin/remove" = $filepath'/'$filename ] ; then
+	echo "Attempting to delete remove - operation aborted"
+	exit 4
+fi
+
+if [ ! -e $HOME/".restore.info" ] ; then
+	touch $HOME/".restore.info"
+fi
+
+mv $filepath/$filename $HOME/"deleted"/$FormattedFileName
+echo $formattedFullPathName'\n' >> $HOME/".restore.info"
