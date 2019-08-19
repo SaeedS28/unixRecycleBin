@@ -7,11 +7,24 @@ fi
 
 restoreFilePath=$(cat $HOME/".restore.info"|grep $1| cut -d":" -f2)
 fileName=$(cat $HOME/".restore.info"|grep $1| cut -d":" -f1)
+#echo $restoreFilePath
 
 if [ -z $fileName ] ; then
 	echo "File does not exit"
 	exit 2
 fi
 
-sed -i "/$filename:$restoreFilePath/d" $HOME/.restore.info
-$(mv "$fileName" "$restoreFilePath")
+if [ -e $restoreFilePath ] ; then
+	read -p "File exists, overwrite?" choice
+	if [ choice = [Yy]* ] ; then
+		echo "overwritten"
+		sed -i "/$filename:$restoreFilePath/d" $HOME/.restore.info
+		mv "$fileName" "$restoreFilePath"
+	else
+		echo "Overwrite aborted"
+	fi
+else
+	sed -i "/$filename:$restoreFilePath/d" $HOME/.restore.info
+	$(mv "$fileName" "$restoreFilePath")
+fi
+

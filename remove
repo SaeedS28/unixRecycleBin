@@ -8,7 +8,7 @@ fi
 
 # error checking
 
-if [ -z $1 ] ; then
+if [ -z $* ] ; then
 	echo "No file name provided."
 	exit 1
 elif [ -d $1 ] ; then
@@ -36,5 +36,6 @@ if [ ! -e $HOME/".restore.info" ] ; then
 	touch $HOME/".restore.info"
 fi
 
-mv $filepath/$filename $HOME/"deleted"/$FormattedFileName
-echo $formattedFullPathName'\n' >> $HOME/".restore.info"
+
+mv $filepath/$filename $HOME/"deleted"/$formattedFileName
+echo $formattedFullPathName >> $HOME/".restore.info"
