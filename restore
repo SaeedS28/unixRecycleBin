@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ $# -eq 0 ] ; then
+	echo "Files not provided"
+	exit 1
+fi
+
+restoreFilePath=$(cat $HOME/".restore.info"|grep $1| cut -d":" -f2)
+fileName=$(cat $HOME/".restore.info"|grep $1| cut -d":" -f1)
+
+if [ -z $fileName ] ; then
+	echo "File does not exit"
+	exit 2
+fi
+
+sed -i "/$filename:$restoreFilePath/d" $HOME/.restore.info
+$(mv "$fileName" "$restoreFilePath")
