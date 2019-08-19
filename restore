@@ -1,30 +1,31 @@
 #!/bin/bash
 
 if [ $# -eq 0 ] ; then
-	echo "Files not provided"
+	echo "File not provided"
 	exit 1
 fi
 
 restoreFilePath=$(cat $HOME/".restore.info"|grep $1| cut -d":" -f2)
 fileName=$(cat $HOME/".restore.info"|grep $1| cut -d":" -f1)
-#echo $restoreFilePath
 
 if [ -z $fileName ] ; then
 	echo "File does not exit"
 	exit 2
 fi
 
+
 if [ -e $restoreFilePath ] ; then
-	read -p "File exists, overwrite?" choice
-	if [ choice = [Yy]* ] ; then
-		echo "overwritten"
-		sed -i "/$filename:$restoreFilePath/d" $HOME/.restore.info
-		mv "$fileName" "$restoreFilePath"
+	read -p "File exists, overwrite? [Y/N]: " choice
+	echo $choice
+	if [ $choice = "y" -o $choice = "Y" ] ; then
+		echo "overwrite successful"
+		sed -i "/$fileName/d" $HOME/.restore.info
+		mv $HOME/"deleted"/$fileName $restoreFilePath
 	else
 		echo "Overwrite aborted"
 	fi
 else
-	sed -i "/$filename:$restoreFilePath/d" $HOME/.restore.info
-	$(mv "$fileName" "$restoreFilePath")
+	sed -i "/$fileName/d" $HOME/.restore.info
+	mv $HOME/"deleted"/$fileName $restoreFilePath
 fi
 
