@@ -1,20 +1,83 @@
 #!/bin/bash
+##   Change the file path before the actual submission   ##"
 
 interactive=0
 verbose=0
+recursive=0
 
-while getopts :vi opt
+# parses file names according to the format specified
+parser() {
+	filepath=$(echo $line| rev | cut -d'/' -f 2- | rev)
+	filename=$(basename $line)
+	inodeIdentifier=$(stat -c%i $filepath/$filename)
+	formattedFileName=$filename'_'$inodeIdentifier
+	formattedFullPathName=$formattedFileName':'$filepath'/'$filename
+}
+
+checkFiles() {
+	if [ $HOME"/unixRecycleBin/remove" = $filepath'/'$filename ] ; then
+		echo "Attempting to delete remove - operation aborted"
+		exit 4
+	fi
+
+	if [ ! -e $HOME/".restore.info" ] ; then
+		touch $HOME/".restore.info"
+	fi
+}
+
+moveAndWrite() {
+	mv $filepath/$filename $HOME/"deleted"/$formattedFileName
+	echo $formattedFullPathName >> $HOME/".restore.info"
+}
+
+deleteFiles() {
+	for line in $(readlink -f $files)
+	do
+	# error checking
+		if [ -d $line ] ; then
+			echo "You have entered a directory. File required."
+			continue
+		elif [ ! -e $line ] ; then
+			echo "File $line does not exist"
+			continue
+		fi
+
+		if [ $interactive -eq 1 ] ; then
+			read -p "Would you like to delete $line? [Y/N]: " choice
+			if [  $choice != 'y' -a $choice != 'Y' ] ; then
+				if [ $verbose -eq 1 ] ; then
+					echo "'$line' not deleted"
+				fi
+				continue
+			fi
+		fi
+
+		parser
+		checkFiles
+
+		if [ $verbose -eq 1 ] ; then
+			echo "removed '$line'"
+		fi
+		moveAndWrite
+	done
+
+}
+
+while getopts :rvi opt
 do
 	case $opt in
 	v)	verbose=1 ;;
 	i)	interactive=1 ;;
+	r)	recursive=1 ;;
 	\?)	echo "$0: invalid option -- '$OPTARG'"
 		exit 32 ;;
 	esac
 done
-shift $(($OPTIND - 1))
 
-if [ -z $# ] ; then
+shift $(($OPTIND - 1))
+files=$*
+
+if [ $# -eq 0 ] ; then
 	echo "No file name provided."
 	exit 1
 fi
@@ -24,49 +87,8 @@ if [ ! -d $HOME/deleted ] ; then
 	mkdir $HOME/deleted
 fi
 
-
-files=$*
-
-for line in $(readlink -f $files)
-do
-# error checking
-	if [ -d $line ] ; then
-		echo "You have entered a directory. File required."
-		continue
-	elif [ ! -e $line ] ; then
-		echo "File $line does not exist"
-		continue
-	fi
-
-	if [ $interactive -eq 1 ] ; then
-		read -p "Would you like to delete $line? [Y/N]: " choice
-		if [  $choice != 'y' -a $choice != 'Y' ] ; then
-			if [ $verbose -eq 1 ] ; then
-				echo "'$line' not deleted"
-			fi
-			continue
-		fi
-	fi
-
-	filepath=$(echo $line| rev | cut -d'/' -f 2- | rev)
-	filename=$(basename $line)
-	inodeIdentifier=$(stat -c%i $filepath/$filename)
-	formattedFileName=$filename'_'$inodeIdentifier
-	formattedFullPathName=$formattedFileName':'$filepath'/'$filename
-
-##   Change the file path before the actual submission   ##"
-	if [ $HOME"/unixRecycleBin/remove" = $filepath'/'$filename ] ; then
-		echo "Attempting to delete remove - operation aborted"
-		exit 4
-	fi
-
-	if [ ! -e $HOME/".restore.info" ] ; then
-		touch $HOME/".restore.info"
-	fi
-
-if [ $verbose -eq 1 ] ; then
-	echo "removed '$line'"
+if [ $recursive -eq 1 ] ; then
+	echo "recursive"
+else
+	deleteFiles
 fi
-	mv $filepath/$filename $HOME/"deleted"/$formattedFileName
-	echo $formattedFullPathName >> $HOME/".restore.info"
-done
