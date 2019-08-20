@@ -63,6 +63,24 @@ deleteFiles() {
 
 }
 
+deleteDirectory() {
+	for dir in $(readlink -f $files)
+	do
+		if [ ! -d $dir ] ; then
+			echo "The directory does not exit"
+			continue
+		fi
+
+		for fil in $(find $dir -type f)
+		do
+			line=$(readlink -f $fil)
+			parser
+			moveAndWrite
+		done
+		rm -r $dir
+	done
+}
+
 while getopts :rvi opt
 do
 	case $opt in
@@ -88,7 +106,7 @@ if [ ! -d $HOME/deleted ] ; then
 fi
 
 if [ $recursive -eq 1 ] ; then
-	echo "recursive"
+	deleteDirectory
 else
 	deleteFiles
 fi
