@@ -1,41 +1,48 @@
 #!/bin/bash
 
+if [ -z $# ] ; then
+	echo "No file name provided."
+	exit 1
+fi
+
 
 # creates a recycle bin if it already doesn't exist
 if [ ! -d $HOME/deleted ] ; then
 	mkdir $HOME/deleted
 fi
 
+
+files=$*
+
+for line in $(readlink -f $files)
+do
+   # echo $line
+
 # error checking
+	if [ -d $line ] ; then
+		echo "You have entered a directory. File required."
+		continue
+	elif [ ! -e $line ] ; then
+		echo "File $line does not exist"
+		continue
+	fi
 
-if [ -z $* ] ; then
-	echo "No file name provided."
-	exit 1
-elif [ -d $1 ] ; then
-	echo "You have entered a directory. File required."
-	exit 2
-elif [ ! -e $1 ] ; then
-	echo "File does not exist"
-	exit 3
-fi
-
-filepath=$(readlink -f $1 | rev | cut -d'/' -f 2- | rev)
-filename=$(basename $1)
-inodeIdentifier=$(stat -c%i $filepath/$filename)
-
-formattedFileName=$filename'_'$inodeIdentifier
-formattedFullPathName=$formattedFileName':'$filepath'/'$filename
+	filepath=$(echo $line| rev | cut -d'/' -f 2- | rev)
+	filename=$(basename $line)
+	inodeIdentifier=$(stat -c%i $filepath/$filename)
+	formattedFileName=$filename'_'$inodeIdentifier
+	formattedFullPathName=$formattedFileName':'$filepath'/'$filename
 
 ##   Change the file path before the actual submission   ##"
-if [ $HOME"/unixRecycleBin/remove" = $filepath'/'$filename ] ; then
-	echo "Attempting to delete remove - operation aborted"
-	exit 4
-fi
+	if [ $HOME"/unixRecycleBin/remove" = $filepath'/'$filename ] ; then
+		echo "Attempting to delete remove - operation aborted"
+		exit 4
+	fi
 
-if [ ! -e $HOME/".restore.info" ] ; then
-	touch $HOME/".restore.info"
-fi
+	if [ ! -e $HOME/".restore.info" ] ; then
+		touch $HOME/".restore.info"
+	fi
 
-
-mv $filepath/$filename $HOME/"deleted"/$formattedFileName
-echo $formattedFullPathName >> $HOME/".restore.info"
+	mv $filepath/$filename $HOME/"deleted"/$formattedFileName
+	echo $formattedFullPathName >> $HOME/".restore.info"
+done
