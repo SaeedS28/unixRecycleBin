@@ -38,10 +38,10 @@ do
 		continue
 	fi
 
-	if [ interactive -eq 1 ] ; then
+	if [ $interactive -eq 1 ] ; then
 		read -p "Would you like to delete $line? [Y/N]: " choice
-		if [ $choice != 'Y' ] || [ $choice != 'y' ] ; then
-			if [ verbose -eq 1 ] ; then
+		if [  $choice != 'y' -a $choice != 'Y' ] ; then
+			if [ $verbose -eq 1 ] ; then
 				echo "'$line' not deleted"
 			fi
 			continue
