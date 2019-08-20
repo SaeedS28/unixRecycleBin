@@ -1,10 +1,23 @@
 #!/bin/bash
 
+interactive=0
+verbose=0
+
+while getopts :vi opt
+do
+	case $opt in
+	v)	verbose=1 ;;
+	i)	interactive=1 ;;
+	\?)	echo "$0: invalid option -- '$OPTARG'"
+		exit 32 ;;
+	esac
+done
+shift $(($OPTIND - 1))
+
 if [ -z $# ] ; then
 	echo "No file name provided."
 	exit 1
 fi
-
 
 # creates a recycle bin if it already doesn't exist
 if [ ! -d $HOME/deleted ] ; then
@@ -16,8 +29,6 @@ files=$*
 
 for line in $(readlink -f $files)
 do
-   # echo $line
-
 # error checking
 	if [ -d $line ] ; then
 		echo "You have entered a directory. File required."
@@ -25,6 +36,16 @@ do
 	elif [ ! -e $line ] ; then
 		echo "File $line does not exist"
 		continue
+	fi
+
+	if [ interactive -eq 1 ] ; then
+		read -p "Would you like to delete $line? [Y/N]: " choice
+		if [ $choice != 'Y' ] || [ $choice != 'y' ] ; then
+			if [ verbose -eq 1 ] ; then
+				echo "'$line' not deleted"
+			fi
+			continue
+		fi
 	fi
 
 	filepath=$(echo $line| rev | cut -d'/' -f 2- | rev)
@@ -43,6 +64,9 @@ do
 		touch $HOME/".restore.info"
 	fi
 
+if [ $verbose -eq 1 ] ; then
+	echo "removed '$line'"
+fi
 	mv $filepath/$filename $HOME/"deleted"/$formattedFileName
 	echo $formattedFullPathName >> $HOME/".restore.info"
 done
