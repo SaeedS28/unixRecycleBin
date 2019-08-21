@@ -5,14 +5,18 @@ if [ $# -eq 0 ] ; then
 	exit 1
 fi
 
+
 restoreFilePath=$(cat $HOME/".restore.info"|grep $1| cut -d":" -f2)
+restoreDirectory=$(echo $restoreFilePath|rev| cut -d"/" -f2-|rev)
+
+mkdir -p $restoreDirectory
+
 fileName=$(cat $HOME/".restore.info"|grep $1| cut -d":" -f1)
 
 if [ -z $fileName ] ; then
 	echo "File does not exit"
 	exit 2
 fi
-
 
 if [ -e $restoreFilePath ] ; then
 	read -p "File exists, overwrite? [Y/N]: " choice
