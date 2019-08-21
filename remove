@@ -71,12 +71,27 @@ deleteDirectory() {
 			continue
 		fi
 
+		if [ $interactive -eq 1 ] ; then
+			read -p "Would you like to delete directory '$dir'? [Y/N]: " choice
+			if [  $choice != 'y' -a $choice != 'Y' ] ; then
+				if [ $verbose -eq 1 ] ; then
+					echo "'$dir' not deleted"
+				fi
+				continue
+			fi
+		fi
+
 		for fil in $(find $dir -type f)
 		do
 			line=$(readlink -f $fil)
 			parser
 			moveAndWrite
 		done
+
+		if [ $verbose -eq 1 ] ; then
+			echo "removed '$line'"
+		fi
+
 		rm -r $dir
 	done
 }
