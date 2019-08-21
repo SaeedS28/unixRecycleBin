@@ -89,7 +89,7 @@ deleteDirectory() {
 		done
 
 		if [ $verbose -eq 1 ] ; then
-			echo "removed '$line'"
+			echo "removed '$dir'"
 		fi
 
 		rm -r $dir
